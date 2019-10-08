@@ -126,7 +126,7 @@ http.createServer(function (req, res) {
 
         if (req.headers['x-hub-signature'] == sig) {
           console.log("det fungerar");
-          exec('cd ' + repo + ' && git pull');
+          exec('cd ' + repo + ' && git pull'); 
         }
     });
 
