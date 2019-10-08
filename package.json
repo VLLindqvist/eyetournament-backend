@@ -2,6 +2,8 @@
   "name": "SerieAPI",
   "version": "0.2.0",
   "dependencies": {
+    "child_process": "^1.0.2",
+    "crypto": "^1.0.1",
     "is-email-node": "^2.0.0",
     "mongodb": "^3.1.13",
     "node-fetch": "^2.3.0",
