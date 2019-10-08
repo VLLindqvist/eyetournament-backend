@@ -114,7 +114,7 @@ const url = (request_url) => {
     };
 };
 
-const secret = "inteMTD2019";
+/*const secret = "inteMTD2019";
 const repo = "~/OneDrive/Universitetsuppgifter/Hemsidor/MTD-API";
 
 const crypto = require('crypto');
@@ -131,6 +131,6 @@ http.createServer(function (req, res) {
     });
 
     res.end();
-}).listen(8080);
+}).listen(8080);*/
 
 server.listen(8000);
