@@ -1,0 +1,17 @@
+'use strict';
+
+const Library = require('../lib.js');
+
+class Myname extends Library {
+    constructor(req, res, query){
+        super(req, res);  
+        //this.query = this.format(query);
+        //this.id = this.extract_value('id', this.query); 
+    }
+
+    index(){
+
+    }
+}
+
+module.exports = myname;
