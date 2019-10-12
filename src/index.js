@@ -9,44 +9,28 @@ class Index extends Library {
   }
 
   async index() {
-    if(this.query.s != null) {
-      // let projection = {};
-      // projection._id = 0;
-      //
-      // const types = ["name", "id", "teams"];
-      // if(this.query.type != null && typeof this.query.type != 'number'){
-      //   const items = this.query.type.split(':');
-      //   items.map((item) => {
-      //     if(types.includes(item)){projection[item] = 1;}
-      //   });
-      // }
+    //store language cookie
+    if(this.query.lang != null) {
+      const cookie = this.parse_cookie();
+      if(cookie != null && cookie.session != null){
+        this.db.remove('sessions', {id: cookie.session});
+      }
 
-      let data = await this.db.find('serier', {id: this.query.s}, {_id: 0, name: 1, owners: 1, id: 1, created: 1, teams: 1, games: 1, points: 1, stats: 1, rank: 1});
-      // let data = await this.db.find('serier', {id: this.query.s}, projection);
-      if(data != null){
-        this.render(data);
-        return;
+      if(this.query.lang === "sv" || this.query.lang === "en") {
+        const session = {
+            lang: this.query.lang,
+            update: time,
+            ip: this.req.connection.remoteAddress,
+            useragent: this.req.headers['user-agent']
+        };
+
+        user.latestlogin = time;
+
+        await this.db.edit('users', {username: user.username}, user);
+        const data = await this.db.insert_with_unique_id('sessions', session, this.random_id, 40, 'id');
+        this.render({login: true, activated: true}, 200, {'Set-Cookie':'session=' + data.id + '; path=/'});
       }
     }
-
-    // if(this.query.t != null) {
-    //   let projection = {};
-    //   projection._id = 0;
-    //
-    //   const types = ["groups", "bracket", "name", "id", "teams"];
-    //   if(this.query.type != null && typeof this.query.type != 'number'){
-    //     const items = this.query.type.split(':');
-    //     items.map((item) => {
-    //       if(types.includes(item)){projection[item] = 1;}
-    //     });
-    //   }
-    //
-    //   let data = await this.db.find('serier', {id: this.query.s}, projection);
-    //   if(data != null){
-    //     this.render(data);
-    //     return;
-    //   }
-    // }
 
     this.render({status: false}, 404); return;
   }
