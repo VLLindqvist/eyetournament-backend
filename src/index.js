@@ -26,9 +26,8 @@ class Index extends Library {
 
         user.latestlogin = time;
 
-        await this.db.edit('users', {username: user.username}, user);
         const data = await this.db.insert_with_unique_id('sessions', session, this.random_id, 40, 'id');
-        this.render({login: true, activated: true}, 200, {'Set-Cookie':'session=' + data.id + '; path=/'});
+        this.render({language: session.lang}, 200, {'Set-Cookie':'session=' + data.id + '; path=/'});
       }
     }
 
