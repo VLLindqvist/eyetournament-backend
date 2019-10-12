@@ -24,7 +24,7 @@ class Database {
         if(skip == null){skip = 0;}
         return new Promise((resolve) => {
             mongodb.connect(url, options, (err, db) => {
-                if(this.error(err)){resolve(null); return;}
+                if(this.error(err)){resolve(null); return;} 
                 db.db(name).collection(collection).find(query, {projection: projection}).sort(sort).skip(skip).limit(limit).toArray((err, res) => {
                     db.close();
                     if(this.error(err)){resolve(null); return;}
