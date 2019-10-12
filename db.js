@@ -3,7 +3,7 @@
 const mongodb = require('mongodb');//3.1.6. .MongoClient;?
 const url = 'mongodb://127.0.0.1:27017/';
 const options = {useNewUrlParser:true};
-const name = 'myDB';
+const name = 'MTD-DB';
 
 class Database {
     find(collection, query, projection){

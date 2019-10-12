@@ -14,7 +14,7 @@ ALL:
 ### ./user/
 GET:
 
-POST: 
+POST:
 * [username, password]
 
 PATCH:
@@ -37,7 +37,7 @@ POST:
 ### ./tournament/
 GET:
 
-POST: 
+POST:
 * name: namn på turneringen
 * group: max antal per grupp
 * type: 0 = semi, 1 = kvarts, 2 = åttondels
@@ -65,14 +65,6 @@ PATCH:
 * bracket: true = ändra match i bracket, utelämmnas ändras matcher i gruppen 'games'
 (./game/create/ = skapar bracket (då alla grupper är 'klara'), tillfällig!)
 
-
-
-
-
-
-
-
-
 # ÖVRIGT
 
 ## GROUPS:
@@ -80,14 +72,7 @@ PATCH:
 1: admin : kan ändra på 'users' + lägga till nya användare
 2: users : ''
 
-## OKLART (?)
-* ta bort '_id' från find och find_all?
-* null eller "null" för input?
-* request limit?
-* findandmodify?
-
-
-## LÄGGA TILL:
+## ATT LÄGGA TILL:
 * ranking, poäng -> vinster -> målskillnad
 * skapa bracket då alla grupper är stängda
 * match om tredjepris

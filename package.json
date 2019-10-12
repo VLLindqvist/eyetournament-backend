@@ -1,6 +1,6 @@
 {
-  "name": "SerieAPI",
-  "version": "0.2.0",
+  "name": "MTD-API",
+  "version": "0.1.0",
   "dependencies": {
     "child_process": "^1.0.2",
     "crypto": "^1.0.1",
@@ -10,8 +10,8 @@
     "nodemailer": "^5.1.1",
     "sanitize-html": "^1.20.0"
   },
-  "description": "API for eyeleague",
-  "main": "serieAPI-Server.js",
+  "description": "Backend for medieteknikdagarna.se",
+  "main": "MTD-API.js",
   "devDependencies": {},
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"

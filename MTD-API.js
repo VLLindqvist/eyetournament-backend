@@ -5,15 +5,6 @@ const qs = require('querystring');
 const parse_url = require('url');
 const Library = require('./lib.js');
 const DB = require('./db.js');
-// var fs = require('fs');
-
-//var key = fs.readFileSync('/etc/letsencrypt/live/vlq.se/privkey.pem');
-//var cert = fs.readFileSync( '/etc/letsencrypt/live/vlq.se/fullchain.pem' );
-
-// var options = {
-//   key: key,
-// 	cert: cert
-// };
 
 const removeVerifications = setInterval(async () => {
   const db = new DB();
@@ -113,24 +104,5 @@ const url = (request_url) => {
         url: correct_url
     };
 };
-
-/*const secret = "inteMTD2019";
-const repo = "~/OneDrive/Universitetsuppgifter/Hemsidor/MTD-API";
-
-const crypto = require('crypto');
-const exec = require('child_process').exec;
-
-http.createServer(function (req, res) {
-    req.on('data', function(chunk) {
-        let sig = "sha1=" + crypto.createHmac('sha1', secret).update(chunk.toString()).digest('hex');
-
-        if (req.headers['x-hub-signature'] == sig) {
-          console.log("det fungerar");
-          exec('cd ' + repo + ' && git pull');
-        }
-    });
-
-    res.end();
-}).listen(8080);*/
 
 server.listen(8000);
