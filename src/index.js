@@ -25,8 +25,6 @@ class Index extends Library {
             useragent: this.req.headers['user-agent']
         };
 
-        user.latestlogin = time;
-
         const data = await this.db.insert_with_unique_id('sessions', session, this.random_id, 40, 'id');
         this.render({language: session.lang}, 200, {'Set-Cookie':'session=' + data.id + '; path=/'});
       }
