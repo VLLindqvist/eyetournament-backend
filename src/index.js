@@ -11,6 +11,7 @@ class Index extends Library {
   async index() {
     //store language cookie
     if(this.query.lang != null) {
+      const time  = new Date().getTime();
       const cookie = this.parse_cookie();
       if(cookie != null && cookie.session != null){
         this.db.remove('sessions', {id: cookie.session});
