@@ -17,37 +17,44 @@ class Lang extends Library {
 
   async self(){
     const data = await this.db.find('sessions', {ip: this.req.connection.remoteAddress}, {lang: 1, _id: 0});
+
     if(data !== null) {
       this.render(data, 200); return;
     }
 
-    this.render({status: false, error: "lang not chosen", lang: "sv"}, 404); return;
+    else {
+      this.setCookie("sv");
+    }
   }
 
   async langChoose() {
     //store language cookie
     if(this.isset(this.query, ["lang"])) {
-      const time  = new Date().getTime();
-      const cookie = this.parse_cookie();
-      if(cookie != null && cookie.session != null){
-        this.db.remove('sessions', {id: cookie.session});
-      }
-
-      if(this.query.lang === "sv" || this.query.lang === "en") {
-        const session = {
-            lang: this.query.lang,
-            update: time,
-            ip: this.req.connection.remoteAddress,
-            useragent: this.req.headers['user-agent']
-        };
-
-        const data = await this.db.insert_with_unique_id('sessions', session, this.random_id, 40, 'id');
-        this.render({lang: session.lang}, 200, {'Set-Cookie':'session=' + data.id + '; path=/'});
-      }
+      this.setCookie(this.query.lang);
     }
 
     else {
       this.render({status: false, error: "empty fields"}, 404); return;
+    }
+  }
+
+  async setCookie(lang) {
+    const time  = new Date().getTime();
+    const cookie = this.parse_cookie();
+    if(cookie != null && cookie.session != null){
+      this.db.remove('sessions', {id: cookie.session});
+    }
+
+    if(lang === "sv" || lang === "en") {
+      const session = {
+          lang: lang,
+          update: time,
+          ip: this.req.connection.remoteAddress,
+          useragent: this.req.headers['user-agent']
+      };
+
+      const data = await this.db.insert_with_unique_id('sessions', session, this.random_id, 40, 'id');
+      this.render({lang: lang}, 200, {'Set-Cookie':'session=' + data.id + '; path=/'});
     }
   }
 }
