@@ -50,6 +50,34 @@ class Library {
         });
     }
 
+    getLang(){
+        return new Promise(async (resolve) => {
+            const cookie = this.parse_cookie();
+            if(cookie == undefined || cookie.session == undefined){
+                resolve(false); return;
+            }
+
+            const session = await this.db.find('sessions', {id: cookie.session});
+            if(session == null) {
+                console.log("error: session not found");
+                resolve(false); return;
+            }
+
+            const time  = new Date().getTime();
+            const expire = time + (3600*1000);
+
+            if(session.useragent != this.req.headers['user-agent'] || session.ip != this.req.connection.remoteAddress || session.expire < time){
+                console.log("error: timeout or ip/user-agent do not match session");
+                resolve(false);
+                this.db.remove('sessions', {id: cookie.session});
+                return;
+            }
+
+            resolve(session.lang);
+            this.db.edit('sessions', {id: cookie.session}, {update: time, expire: expire});
+        });
+    }
+
     post(){
         return new Promise((resolve) => {
             let body = '';

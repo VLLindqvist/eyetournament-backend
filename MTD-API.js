@@ -13,38 +13,58 @@ const removeVerifications = setInterval(async () => {
   const time  = new Date().getTime();
   let remove = [];
 
-  arr.map((item, index) => {
+  arr.forEach((item, index) => {
     if(item.expire < time) {
       remove.push({_id: item._id});
     }
   });
 
   if(remove.length > 0) {
-    remove.map((item) => {
+    remove.forEach((item) => {
       db.remove('verification', item);
     });
   }
-}, 7200000);
+}, 86400000); //every day
 
-const removeAccounts = setInterval(async () => {
+// const removeAccounts = setInterval(async () => {
+//   const db = new DB();
+//
+//   let arr = await db.find_all('users');
+//   const time  = new Date().getTime();
+//   let remove = [];
+//
+//   arr.forEach((item, index) => {
+//     if(item.latestlogin < (time - 63115200000)) {
+//       remove.push({_id: item._id});
+//     }
+//   });
+//
+//   if(remove.length > 0) {
+//     remove.forEach((item) => {
+//       db.remove('users', item);
+//     });
+//   }
+// }, 86400000); //every day
+
+const removeSessions = setInterval(async () => {
   const db = new DB();
 
-  let arr = await db.find_all('users');
+  let arr = await db.find_all('sessions');
   const time  = new Date().getTime();
   let remove = [];
 
-  arr.map((item, index) => {
-    if(item.latestlogin < (time - 31556952000)) {
+  arr.forEach((item, index) => {
+    if(item.expire < time) {
       remove.push({_id: item._id});
     }
   });
 
   if(remove.length > 0) {
-    remove.map((item) => {
-      db.remove('users', item);
+    remove.forEach((item) => {
+      db.remove('sessions', item);
     });
   }
-}, 604800000);
+}, 86400000); //every day
 
 const server = http.createServer((req, res) => {
     console.log(req.headers.origin);

@@ -49,6 +49,7 @@ class Lang extends Library {
       const session = {
           lang: lang,
           update: time,
+          expire: time + (86400000), //one day
           ip: this.req.connection.remoteAddress,
           useragent: this.req.headers['user-agent']
       };

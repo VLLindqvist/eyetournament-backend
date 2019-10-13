@@ -103,7 +103,7 @@ class Login extends Library {
         const session = {
             username: user.username,
             update: time,
-            expire: time + (7200*1000),
+            expire: time + (15778800000), //six months
             ip: this.req.connection.remoteAddress,
             useragent: this.req.headers['user-agent']
         };

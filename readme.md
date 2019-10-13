@@ -1,7 +1,8 @@
 # GROUPS:
-* 0: kan ändra på allt
-* 1: 'admin' kan ändra på '2' och alla turneringar
-* 2: vanliga användare, kan ändra på sig själv + egna turneringar
+* Admin: can do everything
+* CompanyRepresentative: can edit a company's information
+* Photographer: can add photos and remove their own photos
+* Speaker: can edit information about a given event/speaker
 
 # PATH:
 ** login krävs för allt utom ./

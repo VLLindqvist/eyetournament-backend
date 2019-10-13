@@ -31,32 +31,36 @@ class User extends Library {
 
     async add() {
         const input = await this.post();
-        if(!this.isset(input, ["username", "email", "password"])){
+        if(!this.isset(input, ["username", "email", "password", "group"])){
             this.render({status:false, error: "fields missing"}, 404); return;
         }
 
         const email = input.email.trim().toLowerCase();
         const username = input.username.trim();
         if(username.match(/[^a-zA-Z0-9-]|-{2,}/)){
-            this.render({user: false, email: true, pass: true, error: "Illegal characters in username."}); return;
+            this.render({user: false, email: true, pass: true, group: true, error: "Illegal characters in username."}); return;
         }
 
         if(!isEmail(email)) {
-          this.render({user: true, email: false, pass: true, error: "Invalid email."}); return;
+          this.render({user: true, email: false, pass: true, group: true, error: "Invalid email."}); return;
         }
 
         if((await this.db.count('users', {username: username})) != 0){
-            this.render({user: false, email: true, pass: true, error: "The username is taken."}); return;
+            this.render({user: false, email: true, pass: true, group: true, error: "The username is taken."}); return;
         }
 
         if((await this.db.count('users', {email: email})) != 0){
-            this.render({user: true, email: false, pass: true, error: "There is already an account with that email address."}); return;
+            this.render({user: true, email: false, pass: true, group: true, error: "There is already an account with that email address."}); return;
         }
 
         const howManyAccounts = await this.db.find_all('users');
 
-        if(howManyAccounts.length > 1000) {
-          this.render({user: false, email: true, pass: true, error: "Too many users, server can't take it."}); return;
+        if(howManyAccounts.length > 5000) {
+          this.render({user: false, email: true, pass: true, group: true, error: "Too many users, server can't take it."}); return;
+        }
+
+        if(input.group !== "Admin" || input.group !== "CompanyRepresentative" || input.group !== "Photographer" || input.group !== "Speaker") {
+          this.render({user: false, email: true, pass: true, group: false, error: "Group error!"}); return;
         }
 
         const hash = this.hash(username, salt);
@@ -75,7 +79,7 @@ class User extends Library {
         });
 
         const mailOptions = {
-          from: '"eyeLeague" <no-reply@eyeleague.se>', // sender address
+          from: '<no-reply@medieteknikdagarna.se>', // sender address
           to: email, // list of receivers
           subject: 'Kontoverifiering', // Subject line
           html: '<div>'
@@ -114,13 +118,13 @@ class User extends Library {
             email: email,
             password: this.hash(input.password, (username+salt)),
             active: false,
-            group: 1, // default!
+            group: input.group,
             latestlogin: time
         };
 
         await this.db.insert('verification', verification);
         await this.db.insert('users', data);
-        this.render({user: true, email: true, pass: true}, 200);
+        this.render({user: true, email: true, pass: true, group: true, group: data.group}, 200);
     }
 
     async update(){
@@ -134,7 +138,7 @@ class User extends Library {
             if(!(user.group == 0 || user.group == 1)){this.render({}, 401); return;}
 
             const target = await this.db.find('users', {username: this.query.username});
-            if(target == null || (user.group == 1 && (target.group == 1 || target.group == 0))){
+            if(target == null || (user.group === "Admin" && (target.group === "CompanyRepresentative" || target.group === "Photographer" || target.group === "Speaker"))){
                 this.render({status: false, error: "my error"}); return;
             }
 
@@ -159,7 +163,7 @@ class User extends Library {
         }
 
         if(this.query.group != null){
-            if(!password_required && (this.query.group == 1 || this.query.group == 2)){
+            if(!password_required && (target.group === "CompanyRepresentative" || target.group === "Photographer" || target.group === "Speaker")){
                 changes.group = this.query.group;
             }else {
                 this.render({status: false, error: "nah.."}); return;
@@ -196,7 +200,7 @@ class User extends Library {
             this.render({status: false, error: "user not found"}); return;
         }
 
-        if(target.group == 0 || (user.group == 1 && target.group == 1)){
+        if(target.group === "Admin" || (target.group === "CompanyRepresentative" || target.group === "Photographer" || target.group === "Speaker")){
             this.render({status: false, error: "nej."}, 401); return;
         }
 
