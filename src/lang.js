@@ -16,7 +16,7 @@ class Lang extends Library {
   }
 
   async self(){
-    this.render(await this.db.find('sessions', {ip: this.req.connection.remoteAddress}, {lang: 1}), 200);
+    this.render(await this.db.find('sessions', {ip: this.req.connection.remoteAddress}, {lang: 1, id: 0}), 200);
     return;
   }
 
