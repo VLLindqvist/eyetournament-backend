@@ -164,4 +164,4 @@ class About extends Library {
     // }
 }
 
-module.exports = Serie;
+module.exports = About;
