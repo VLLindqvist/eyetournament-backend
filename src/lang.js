@@ -16,8 +16,12 @@ class Lang extends Library {
   }
 
   async self(){
-    this.render(await this.db.find('sessions', {ip: this.req.connection.remoteAddress}, {lang: 1, _id: 0}), 200);
-    return;
+    const data = await this.db.find('sessions', {ip: this.req.connection.remoteAddress}, {lang: 1, _id: 0});
+    if(data !== null) {
+      this.render(data, 200); return;
+    }
+
+    this.render({status: false, error: "lang not chosen", lang: "sv"}, 404); return;
   }
 
   async langChoose() {
@@ -38,7 +42,7 @@ class Lang extends Library {
         };
 
         const data = await this.db.insert_with_unique_id('sessions', session, this.random_id, 40, 'id');
-        this.render({language: session.lang}, 200, {'Set-Cookie':'session=' + data.id + '; path=/'});
+        this.render({lang: session.lang}, 200, {'Set-Cookie':'session=' + data.id + '; path=/'});
       }
     }
 
