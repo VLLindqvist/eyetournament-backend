@@ -7,10 +7,10 @@ class Content {
         this.lang = lang;
         this.newContent = newContent;
 
-        await this["edit_" + page]();
+        this["edit_" + page]();
     }
 
-    async edit_about() {
+    edit_about() {
 
     }
 
