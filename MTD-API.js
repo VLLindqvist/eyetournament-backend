@@ -1,7 +1,7 @@
 'use strict';
 
 const http = require('http');
-let proxiedHttp = require('findhit-proxywrap').proxy(http);
+// let proxiedHttp = require('findhit-proxywrap').proxy(http);
 const qs = require('querystring');
 const parse_url = require('url');
 const Library = require('./lib.js');
@@ -52,7 +52,7 @@ const storeSessionsInterval = setInterval(async () => {
   await storeSessions();
 }, 1800000); //every thirty minutes
 
-const server = proxiedHttp.createServer((req, res) => {
+const server = http.createServer((req, res) => {
     console.log(req.headers.origin);
 
     const input = url(req.url);
