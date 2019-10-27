@@ -10,11 +10,10 @@ const DB = require('./db.js');
 let sessions = [];
 
 const storeSessions = () => {
-  const db = new DB();
-  db.drop('sessions'); //remove all sessions
+  this.db.drop('sessions'); //remove all sessions
 
   sessions.forEach((item, index) => {
-    db.insert_with_unique_id('sessions', item, this.random_id, 40, 'id');
+    this.db.insert_with_unique_id('sessions', item, this.random_id, 40, 'id');
   });
 }
 

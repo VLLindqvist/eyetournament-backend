@@ -4,7 +4,6 @@ const DB = require('./db.js');
 const qs = require('querystring');
 const fs = require('fs');
 const crypto = require('crypto');
-this.sessions = [];
 
 class Library {
     constructor(req, res){
@@ -12,6 +11,7 @@ class Library {
         this.req = req;
         this.res = res;
         this.method = req.method;
+        this.sessions = [];
     }
 
     // check login status
