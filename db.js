@@ -3,7 +3,7 @@
 const mongodb = require('mongodb');//3.1.6. .MongoClient;?
 const url = 'mongodb://127.0.0.1:27017/';
 const options = {useNewUrlParser:true};
-const name = 'MTD-DB';
+const name = 'MTD-DB'; 
 
 class Database {
     find(collection, query, projection){
@@ -24,7 +24,7 @@ class Database {
         if(skip == null){skip = 0;}
         return new Promise((resolve) => {
             mongodb.connect(url, options, (err, db) => {
-                if(this.error(err)){resolve(null); return;} 
+                if(this.error(err)){resolve(null); return;}
                 db.db(name).collection(collection).find(query, {projection: projection}).sort(sort).skip(skip).limit(limit).toArray((err, res) => {
                     db.close();
                     if(this.error(err)){resolve(null); return;}
