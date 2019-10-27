@@ -7,15 +7,27 @@ const parse_url = require('url');
 const Library = require('./lib.js');
 const DB = require('./db.js');
 
+//ska den ligga här?
+global.random_id = ((length) => {
+    const data = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    let id = "";
+    let n = Math.floor(Math.random() * 5) + 15;
+    if(Number.isInteger(length)){n = length;}
+
+    for(let i = 0; i < n; i++){
+        id += data.charAt(Math.floor(Math.random() * data.length));
+    }
+    return id;
+});
+
 global.sessions = [];
 
 global.storeSessions = () => {
   const db = new DB();
-  const lib = new Library(null, null);
   db.drop('sessions'); //remove all sessions
 
   sessions.forEach((item, index) => {
-    db.insert_with_unique_id('sessions', item, lib.random_id, 40, 'id');
+    db.insert_with_unique_id('sessions', item, random_id, 40, 'id');
   });
 }
 
