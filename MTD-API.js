@@ -11,10 +11,11 @@ global.sessions = [];
 
 global.storeSessions = () => {
   const db = new DB();
+  const lib = new Library(null, null);
   db.drop('sessions'); //remove all sessions
 
   sessions.forEach((item, index) => {
-    db.insert_with_unique_id('sessions', item, this.random_id, 40, 'id');
+    db.insert_with_unique_id('sessions', item, lib.random_id, 40, 'id');
   });
 }
 
