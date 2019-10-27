@@ -79,7 +79,7 @@ class Library {
             }
 
             // const session = await this.db.find('sessions', {id: cookie.session});
-            let session = sessions.find(obj => obj.lang === cookie.lang);
+            let session = sessions.find(obj => obj.token === cookie.token);
             if(session == null) {
                 console.log("error: language not found");
                 resolve(false); return;

@@ -1,6 +1,7 @@
 'use strict';
 
 const Library = require('../lib.js');
+const salt = 'nm/&(xx2d329738d2b36#';
 
 class Lang extends Library {
   constructor(req, res, query){
@@ -45,17 +46,20 @@ class Lang extends Library {
       this.db.remove('sessions', {id: cookie.session});
     }
 
+    const hashing = this.hash(this.random_id(15), salt);
+
     if(lang === "sv" || lang === "en") {
       const session = {
           lang: lang,
-          update: time,
-          expire: time + (86400000), //one day
+          token: hashing,
           ip: this.req.connection.remoteAddress,
           useragent: this.req.headers['user-agent']
       };
 
-      const data = await this.db.insert_with_unique_id('sessions', session, this.random_id, 40, 'id');
-      this.render({lang: lang}, 200, {'Set-Cookie':'session=' + data.id + '; path=/'});
+      // const data = await this.db.insert_with_unique_id('sessions', session, this.random_id, 40, 'id');
+      sessions.push(session);
+      storeSessions();
+      this.render({lang: lang, token: session.token}, 200);//, {'Set-Cookie':'session=' + data.id + '; path=/'});
     }
   }
 }
