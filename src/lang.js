@@ -31,7 +31,8 @@ class Lang extends Library {
   async langChoose() {
     //store language cookie
     if(this.isset(this.query, ["lang"])) {
-      this.setCookie(this.query.lang);
+      console.log(sessions);
+      // this.setCookie(this.query.lang);
     }
 
     else {
