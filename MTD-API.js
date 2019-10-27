@@ -7,7 +7,7 @@ const parse_url = require('url');
 const Library = require('./lib.js');
 const DB = require('./db.js');
 
-this.sessions = [];
+global.sessions = [];
 
 const storeSessions = () => {
   const db = new DB();
