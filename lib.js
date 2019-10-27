@@ -11,7 +11,6 @@ class Library {
         this.req = req;
         this.res = res;
         this.method = req.method;
-        this.sessions = [];
     }
 
     // check login status
