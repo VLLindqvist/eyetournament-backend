@@ -4,6 +4,7 @@ const DB = require('./db.js');
 const qs = require('querystring');
 const fs = require('fs');
 const crypto = require('crypto');
+this.sessions = [];
 
 class Library {
     constructor(req, res){
