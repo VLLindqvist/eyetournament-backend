@@ -9,7 +9,7 @@ const DB = require('./db.js');
 
 global.sessions = [];
 
-const storeSessions = () => {
+global.storeSessions = () => {
   const db = new DB();
   db.drop('sessions'); //remove all sessions
 
