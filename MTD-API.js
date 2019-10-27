@@ -9,12 +9,12 @@ const DB = require('./db.js');
 
 let sessions = [];
 
-const storeSessions = async () => {
+const storeSessions = () => {
   const db = new DB();
   db.drop('sessions'); //remove all sessions
 
   sessions.forEach((item, index) => {
-    await db.insert_with_unique_id('sessions', item, this.random_id, 40, 'id');
+    db.insert_with_unique_id('sessions', item, this.random_id, 40, 'id');
   });
 }
 
