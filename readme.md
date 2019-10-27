@@ -1,8 +1,8 @@
 # GROUPS:
-* Admin: can do everything
-* CompanyRepresentative: can edit a company's information
-* Photographer: can add photos and remove their own photos
-* Speaker: can edit information about a given event/speaker
+* Admin(0): can do everything
+* CompanyRepresentative(1): can edit a company's information
+* Photographer(2): can add photos and remove their own photos
+* Speaker(3): can edit information about a given event/speaker
 
 # PATH:
 ** login krävs för allt utom ./

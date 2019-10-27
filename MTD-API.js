@@ -1,12 +1,22 @@
 'use strict';
 
 const http = require('http');
+let proxiedHttp = require('findhit-proxywrap').proxy(http);
 const qs = require('querystring');
 const parse_url = require('url');
 const Library = require('./lib.js');
 const DB = require('./db.js');
 
-this.sessions = [];
+let sessions = [];
+
+const storeSessions = async () => {
+  const db = new DB();
+  db.drop('sessions'); //remove all sessions
+
+  sessions.forEach((item, index) => {
+    await db.insert_with_unique_id('sessions', item, this.random_id, 40, 'id');
+  });
+}
 
 const removeVerifications = setInterval(async () => {
   const db = new DB();
@@ -29,26 +39,20 @@ const removeVerifications = setInterval(async () => {
 }, 86400000); //every day
 
 const removeSessions = setInterval(async () => {
-  const db = new DB();
-
-  let arr = await db.find_all('sessions');
   const time  = new Date().getTime();
-  let remove = [];
 
-  arr.forEach((item, index) => {
+  sessions.forEach((item, index, arr) => {
     if(item.expire < time) {
-      remove.push({_id: item._id});
+      arr.splice(index, 1);
     }
   });
-
-  if(remove.length > 0) {
-    remove.forEach((item) => {
-      db.remove('sessions', item);
-    });
-  }
 }, 86400000); //every day
 
-const server = http.createServer((req, res) => {
+const storeSessionsInterval = setInterval(async () => {
+  await storeSessions();
+}, 1800000); //every thirty minutes
+
+const server = proxiedHttp.createServer((req, res) => {
     console.log(req.headers.origin);
 
     const input = url(req.url);
@@ -62,7 +66,7 @@ const server = http.createServer((req, res) => {
         new Library(req, res).render({}, 301, {Location: input.url});
         return;
     }
-    // try {
+    try {
         let target;
         if(input.path.length != 0){
             target = require('./src/'+input.path[0]+'.js');
@@ -78,9 +82,9 @@ const server = http.createServer((req, res) => {
         }else {
             obj.index();
         }
-    // }catch(e){
-    //     new Library(req, res).render({status: false, error: e}, 404);
-    // }
+    }catch(e){
+        new Library(req, res).render({status: false, error: e}, 404);
+    }
 });
 
 const url = (request_url) => {

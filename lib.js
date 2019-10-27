@@ -22,17 +22,25 @@ class Library {
                 resolve(false); return;
             }
 
-            const session = await this.db.find('sessions', {id: cookie.session});
-            if(session == null){
+            //const session = await this.db.find('sessions', {id: cookie.session});
+            let session = sessions.find(obj => obj.token === cookie.token);
+
+            if(session == null) {
                 console.log("error: session not found");
                 resolve(false); return;
             }
 
-            let user = await this.db.find('users', {username: session.username});
-            if(user == null){
-                this.db.remove('sessions', {id: cookie.session});
-                resolve(false); return;
-            }
+            // let user = await this.db.find('users', {username: session.username});
+            // if(user == null){
+            //     // this.db.remove('sessions', {id: cookie.session});
+            //     resolve(false);
+            //     sessions.forEach((item, index, arr) => {
+            //       if(item.token === session.token) {
+            //         arr.splice(index, 1);
+            //       }
+            //     });
+            //     resolve(false); return;
+            // }
 
             const time  = new Date().getTime();
             const expire = time + (3600*1000);
@@ -40,41 +48,55 @@ class Library {
             if(session.useragent != this.req.headers['user-agent'] || session.ip != this.req.connection.remoteAddress || session.expire < time){
                 console.log("error: timeout or ip/user-agent do not match session");
                 resolve(false);
-                this.db.remove('sessions', {id: cookie.session});
+                sessions.forEach((item, index, arr) => {
+                  if(item.token === session.token) {
+                    arr.splice(index, 1);
+                  }
+                });
+                // this.db.remove('sessions', {id: cookie.session});
                 return;
             }
 
-            user.session = session;
-            resolve(user);
-            this.db.edit('sessions', {id: cookie.session}, {update: time, expire: expire});
+            // user.session = session;
+            resolve(session);
+            // this.db.edit('sessions', {id: cookie.session}, {update: time, expire: expire});
+            session.update = time;
+            session.expire = expire;
+            sessions.forEach((item, index, arr) => {
+              if(item.token === session.token) {
+                arr.splice(index, 1);
+              }
+            });
+            sessions.push(session);
         });
     }
 
     getLang(){
         return new Promise(async (resolve) => {
             const cookie = this.parse_cookie();
-            if(cookie == undefined || cookie.session == undefined){
+            if(cookie == undefined || cookie.lang == undefined){
                 resolve(false); return;
             }
 
-            const session = await this.db.find('sessions', {id: cookie.session});
+            // const session = await this.db.find('sessions', {id: cookie.session});
+            let session = sessions.find(obj => obj.lang === cookie.lang);
             if(session == null) {
-                console.log("error: session not found");
+                console.log("error: language not found");
                 resolve(false); return;
             }
 
-            const time  = new Date().getTime();
-            const expire = time + (3600*1000);
-
-            if(session.useragent != this.req.headers['user-agent'] || session.ip != this.req.connection.remoteAddress || session.expire < time){
-                console.log("error: timeout or ip/user-agent do not match session");
-                resolve(false);
-                this.db.remove('sessions', {id: cookie.session});
-                return;
+            if(session.lang == undefined || session.lang == null) {
+              session.lang = "sv";
             }
 
             resolve(session.lang);
-            this.db.edit('sessions', {id: cookie.session}, {update: time, expire: expire});
+            // this.db.edit('sessions', {id: cookie.session}, {update: time, expire: expire});
+            sessions.forEach((item, index, arr) => {
+              if(item.lang === session.lang) {
+                arr.splice(index, 1);
+              }
+            });
+            sessions.push(session);
         });
     }
 
@@ -195,6 +217,7 @@ class Library {
             row = row.trim();
             obj = Object.assign(obj, qs.parse(row));
         }
+        console.log(obj);
         return obj;
     }
 
@@ -208,12 +231,55 @@ class Library {
         return hash.digest('hex');
     }
 
+    sendVerificationMail(user, hash) {
+      //------- MAIL -----------
+
+      var transporter = nodemailer.createTransport({
+        host: 'smtp01.binero.se',
+        port: 587,
+        secure: true,
+        auth: {
+          user: "no-reply@medieteknikdagarna.se",
+          pass: "inteMTD2019"
+        }
+      });
+
+      const mailOptions = {
+        from: '"eyeLeague" <no-reply@eyeleague.se>', // sender address
+        to: user.email, // list of receivers
+        subject: 'Kontoverifiering', // Subject line
+        html: '<div>'
+              +  '<img style="margin: auto; max-width: 150px; background-color: #557a95; padding: 10px;" src="http://eyeleague.se/static/media/EmaileyeLeague.png" alt="logo">'
+              +  '<div style="border: 1px solid #ccc; border-radius: 2px; background-color: #fff; padding: 15px;">'
+              +    '<p style="margin-left: 20px; margin-right: 20px; font-family: Arial, Helvetica, sans-serif; line-height: 25px; color: gray; margin-bottom: 35px;">'
+              +      'Hej ' + user.username + '!<br><br>Tack för att du skapade ditt eyeLeague-konto. Tryck på knappen nedan för att bekräfta din e-postadress och slutföra regristreringen.'
+              +    ' Länken är giltig i 24 timmar.</p>'
+              +    '<a style="text-decoration: none;" href="http://eyeleague.se/verify/' + user.username + '-' + hash + '">'
+              +      '<div style="margin: auto; padding: 8px; background-color: #557a95; border: 1px solid #7395ae; border-radius: 2px; width: 175px; text-align: center;">'
+              +        '<h2 style="color: #fff; margin: 0; font-family: Arial, Helvetica, sans-serif; letter-spacing: 0.8px;">Verifiera</h2>'
+              +      '</div>'
+              +    '</a>'
+              +  '</div>'
+              + '</div>',
+      };
+
+      transporter.sendMail(mailOptions, function (err, info) {
+        if(err) {
+          console.log(err);
+        }
+        else {
+         // console.log(info);
+         console.log("Mail sent to " + user.email);
+        }
+      });
+    }
+
     render(json, http_status_code, option){
         if(http_status_code == null){http_status_code = 200;}
         this.res.setHeader('Content-Type', 'application/json');
 
         // TILLFÄLLIG:
-        console.log("req origin: " + this.req.headers.origin + ", ip: " + this.req.connection.remoteAddress);
+        //console.log("req origin: " + this.req.headers.origin + ", ip: " + this.req.connection.remoteAddress);
 
         if(this.req.headers.origin !== "http://vlq.se"){
             this.res.setHeader('Access-Control-Allow-Origin', this.req.headers.origin);
