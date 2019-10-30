@@ -32,7 +32,6 @@ class Login extends Library {
         if(isEmail(input.username)) {
           user = await this.db.find('users', {email: input.username.toLowerCase()}, {username: 1, password: 1, email: 1, active: 1});
         }
-
         else {
           user = await this.db.find('users', {username: input.username}, {username: 1, password: 1, email: 1, active: 1});
         }
@@ -51,68 +50,43 @@ class Login extends Library {
 
         if(user.active == false) {
           const hash2 = this.hash(user.username, salt);
-          //------- MAIL -----------
 
-          var transporter = nodemailer.createTransport({
-            host: 'mailout.telia.com',
-            port: 465,
-            secure: true, // upgrade later with STARTTLS
-            auth: {
-              user: "a00519341",
-              pass: "19abb84a"
-            }
-          });
+          this.sendVerificationMail(user, hash2);
 
-          const mailOptions = {
-            from: '"eyeLeague" <no-reply@eyeleague.se>', // sender address
-            to: user.email, // list of receivers
-            subject: 'Kontoverifiering', // Subject line
-            html: '<div>'
-                  +  '<img style="margin: auto; max-width: 150px; background-color: #557a95; padding: 10px;" src="http://eyeleague.se/static/media/EmaileyeLeague.png" alt="logo">'
-                  +  '<div style="border: 1px solid #ccc; border-radius: 2px; background-color: #fff; padding: 15px;">'
-                  +    '<p style="margin-left: 20px; margin-right: 20px; font-family: Arial, Helvetica, sans-serif; line-height: 25px; color: gray; margin-bottom: 35px;">'
-                  +      'Hej ' + user.username + '!<br><br>Tack för att du skapade ditt eyeLeague-konto. Tryck på knappen nedan för att bekräfta din e-postadress och slutföra regristreringen.'
-                  +    ' Länken är giltig i 24 timmar.</p>'
-                  +    '<a style="text-decoration: none;" href="http://eyeleague.se/verify/' + user.username + '-' + hash2 + '">'
-                  +      '<div style="margin: auto; padding: 8px; background-color: #557a95; border: 1px solid #7395ae; border-radius: 2px; width: 175px; text-align: center;">'
-                  +        '<h2 style="color: #fff; margin: 0; font-family: Arial, Helvetica, sans-serif; letter-spacing: 0.8px;">Verifiera</h2>'
-                  +      '</div>'
-                  +    '</a>'
-                  +  '</div>'
-                  + '</div>',
-          };
-
-          transporter.sendMail(mailOptions, function (err, info) {
-            if(err)
-             console.log(err)
-            else
-             // console.log(info);
-             console.log("Mail sent to " + user.email);
-          });
-
-          //----------------------------
-          this.render({login: true, activated: false, error: "User not actiated"}, 403);
+          this.render({login: false, activated: false, error: "User not actiated"}, 403);
           return;
         }
 
         const cookie = this.parse_cookie();
-        if(cookie != null && cookie.session != null){
-          this.db.remove('sessions', {id: cookie.session});
+        if(cookie != null && cookie.session != null) {
+          sessions.forEach((item, index, obj) => {
+            if(item.id == cookie.session) {
+              obj.splice(index, 1);
+            }
+          });
         }
+
+        const hashing = this.hash(this.random_id(15) + hash, salt);
 
         const session = {
             username: user.username,
+            email: user.email,
+            group: user.group,
+            latestlogin: time,
             update: time,
             expire: time + (15778800000), //six months
             ip: this.req.connection.remoteAddress,
-            useragent: this.req.headers['user-agent']
+            useragent: this.req.headers['user-agent'],
+            token: hashing
         };
 
         user.latestlogin = time;
 
         await this.db.edit('users', {username: user.username}, user);
-        const data = await this.db.insert_with_unique_id('sessions', session, this.random_id, 40, 'id');
-        this.render({login: true, activated: true}, 200, {'Set-Cookie':'session=' + data.id + '; path=/'});
+        // const data = await this.db.insert_with_unique_id('sessions', session, this.random_id, 40, 'id');
+        sessions.push(session);
+        storeSessions();
+        this.render({login: true, activated: true, token: session.token}, 200);//, {'Set-Cookie':'session=' + data.id + '; path=/'});
     }
 
     async newPassword() {

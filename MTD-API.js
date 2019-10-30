@@ -1,10 +1,35 @@
 'use strict';
 
 const http = require('http');
+// let proxiedHttp = require('findhit-proxywrap').proxy(http);
 const qs = require('querystring');
 const parse_url = require('url');
 const Library = require('./lib.js');
 const DB = require('./db.js');
+
+//ska den ligga här?
+global.random_id = ((length) => {
+    const data = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    let id = "";
+    let n = Math.floor(Math.random() * 5) + 15;
+    if(Number.isInteger(length)){n = length;}
+
+    for(let i = 0; i < n; i++){
+        id += data.charAt(Math.floor(Math.random() * data.length));
+    }
+    return id;
+});
+
+global.sessions = [];
+
+global.storeSessions = () => {
+  const db = new DB();
+  db.drop('sessions'); //remove all sessions
+
+  sessions.forEach((item, index) => {
+    db.insert_with_unique_id('sessions', item, random_id, 40, 'id');
+  });
+}
 
 const removeVerifications = setInterval(async () => {
   const db = new DB();
@@ -26,45 +51,19 @@ const removeVerifications = setInterval(async () => {
   }
 }, 86400000); //every day
 
-// const removeAccounts = setInterval(async () => {
-//   const db = new DB();
-//
-//   let arr = await db.find_all('users');
-//   const time  = new Date().getTime();
-//   let remove = [];
-//
-//   arr.forEach((item, index) => {
-//     if(item.latestlogin < (time - 63115200000)) {
-//       remove.push({_id: item._id});
-//     }
-//   });
-//
-//   if(remove.length > 0) {
-//     remove.forEach((item) => {
-//       db.remove('users', item);
-//     });
-//   }
-// }, 86400000); //every day
-
 const removeSessions = setInterval(async () => {
-  const db = new DB();
-
-  let arr = await db.find_all('sessions');
   const time  = new Date().getTime();
-  let remove = [];
 
-  arr.forEach((item, index) => {
+  sessions.forEach((item, index, arr) => {
     if(item.expire < time) {
-      remove.push({_id: item._id});
+      arr.splice(index, 1);
     }
   });
-
-  if(remove.length > 0) {
-    remove.forEach((item) => {
-      db.remove('sessions', item);
-    });
-  }
 }, 86400000); //every day
+
+const storeSessionsInterval = setInterval(async () => {
+  await storeSessions();
+}, 1800000); //every thirty minutes
 
 const server = http.createServer((req, res) => {
     console.log(req.headers.origin);
@@ -80,7 +79,7 @@ const server = http.createServer((req, res) => {
         new Library(req, res).render({}, 301, {Location: input.url});
         return;
     }
-    // try {
+    try {
         let target;
         if(input.path.length != 0){
             target = require('./src/'+input.path[0]+'.js');
@@ -96,9 +95,9 @@ const server = http.createServer((req, res) => {
         }else {
             obj.index();
         }
-    // }catch(e){
-    //     new Library(req, res).render({status: false, error: e}, 404);
-    // }
+    }catch(e){
+        new Library(req, res).render({status: false, error: e}, 404);
+    }
 });
 
 const url = (request_url) => {
